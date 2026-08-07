@@ -1,0 +1,109 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
+  padding-top: var(--space-sm);
+}
+
+.resetButton {
+  appearance: none;
+  background: transparent;
+  border: 1px solid var(--color-line);
+  color: var(--color-ink-muted);
+  font-size: 0.85rem;
+  letter-spacing: 0.03em;
+  padding: 0.55rem 0.95rem;
+  border-radius: var(--radius-sm);
+  transition:
+    color var(--transition),
+    border-color var(--transition),
+    background var(--transition),
+    transform var(--transition);
+}
+
+.resetButton:hover:not(:disabled) {
+  color: var(--color-ink);
+  border-color: var(--color-ink-muted);
+  background: rgba(44, 38, 34, 0.03);
+}
+
+.resetButton:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.dialog {
+  width: 100%;
+  text-align: center;
+  padding: var(--space-md);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  animation: fade-swap 220ms ease both;
+}
+
+.message {
+  margin: 0 0 var(--space-md);
+  font-size: 0.95rem;
+  color: var(--color-ink);
+  line-height: 1.45;
+}
+
+.actions {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+.confirm,
+.cancel {
+  appearance: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  padding: 0.55rem 1rem;
+  border-radius: var(--radius-sm);
+  transition:
+    background var(--transition),
+    border-color var(--transition),
+    color var(--transition),
+    transform var(--transition);
+}
+
+.confirm {
+  border: 1px solid var(--color-accent);
+  background: var(--color-accent);
+  color: #fffaf6;
+}
+
+.confirm:hover {
+  background: var(--color-accent-hover);
+  border-color: var(--color-accent-hover);
+}
+
+.cancel {
+  border: 1px solid var(--color-line);
+  background: transparent;
+  color: var(--color-ink-muted);
+}
+
+.cancel:hover {
+  color: var(--color-ink);
+  border-color: var(--color-ink-muted);
+}
+
+.confirm:active,
+.cancel:active {
+  transform: scale(0.98);
+}
+
+@keyframes fade-swap {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

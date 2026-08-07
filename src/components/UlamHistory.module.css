@@ -1,0 +1,205 @@
+.section {
+  margin-top: var(--space-sm);
+}
+
+.title {
+  margin: 0 0 var(--space-md);
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 600;
+  text-align: center;
+  letter-spacing: 0.03em;
+  color: var(--color-ink);
+}
+
+.empty {
+  margin: 0;
+  text-align: center;
+  font-size: 0.95rem;
+  color: var(--color-ink-muted);
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.item {
+  padding: var(--space-sm) 0;
+  border-bottom: 1px solid var(--color-line-soft);
+}
+
+.item:first-child {
+  border-top: 1px solid var(--color-line-soft);
+}
+
+.date {
+  margin: 0 0 0.35rem;
+  font-size: 0.85rem;
+  color: var(--color-ink-muted);
+  letter-spacing: 0.02em;
+}
+
+.dishList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.dishRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  padding: 0.35rem 0;
+  border-top: 1px solid var(--color-line-soft);
+}
+
+.dishRow:first-child {
+  border-top: none;
+  padding-top: 0;
+}
+
+.name {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--color-ink);
+  line-height: 1.25;
+}
+
+/* Hidden by default on desktop; fades in on row hover / focus. */
+.deleteBtn {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  margin: 0 -0.2rem 0 0;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: #9a9188;
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.dishRow:hover .deleteBtn,
+.dishRow:focus-within .deleteBtn,
+.item:hover .deleteBtn,
+.item:focus-within .deleteBtn {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.deleteBtn:hover {
+  color: var(--color-ink);
+  transform: scale(1.1);
+}
+
+.deleteBtn:active {
+  transform: scale(0.96);
+}
+
+.deleteIcon {
+  width: 0.85rem;
+  height: 0.85rem;
+  stroke: currentColor;
+  stroke-width: 1.75;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Touch / narrow screens: always show the delete control. */
+@media (hover: none), (max-width: 640px) {
+  .deleteBtn {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
+.dialog {
+  margin-top: var(--space-md);
+  width: 100%;
+  text-align: center;
+  padding: var(--space-md);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  animation: fade-swap 220ms ease both;
+}
+
+.message {
+  margin: 0 0 var(--space-md);
+  font-size: 0.95rem;
+  color: var(--color-ink);
+  line-height: 1.45;
+}
+
+.actions {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+.confirm,
+.cancel {
+  appearance: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  padding: 0.55rem 1rem;
+  border-radius: var(--radius-sm);
+  transition:
+    background var(--transition),
+    border-color var(--transition),
+    color var(--transition),
+    transform var(--transition);
+}
+
+.confirm {
+  border: 1px solid var(--color-accent);
+  background: var(--color-accent);
+  color: #fffaf6;
+}
+
+.confirm:hover {
+  background: var(--color-accent-hover);
+  border-color: var(--color-accent-hover);
+}
+
+.cancel {
+  border: 1px solid var(--color-line);
+  background: transparent;
+  color: var(--color-ink-muted);
+}
+
+.cancel:hover {
+  color: var(--color-ink);
+  border-color: var(--color-ink-muted);
+}
+
+.confirm:active,
+.cancel:active {
+  transform: scale(0.98);
+}
+
+@keyframes fade-swap {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

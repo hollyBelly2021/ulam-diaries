@@ -1,0 +1,37 @@
+.header {
+  text-align: center;
+  padding-bottom: var(--space-sm);
+}
+
+.brand {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(2.15rem, 7vw, 2.75rem);
+  letter-spacing: 0.02em;
+  color: var(--color-ink);
+  line-height: 1.1;
+}
+
+.dateBlock {
+  margin-top: var(--space-md);
+  padding: var(--space-sm) 0;
+  border-top: 1px solid var(--color-line);
+  border-bottom: 1px solid var(--color-line);
+}
+
+.weekday {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--color-ink);
+}
+
+.fullDate {
+  margin: 0.15rem 0 0;
+  font-size: 0.95rem;
+  color: var(--color-ink-muted);
+  letter-spacing: 0.02em;
+}
