@@ -66,10 +66,18 @@
   color: var(--color-ink-muted);
 }
 
+.inputRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 0 var(--space-sm);
+}
+
 .input {
-  width: 100%;
+  flex: 1;
+  min-width: 0;
   box-sizing: border-box;
-  margin: 0 0 var(--space-md);
+  margin: 0;
   padding: 0.7rem 0.85rem;
   border: 1px solid var(--color-line);
   border-radius: var(--radius-sm);
@@ -87,6 +95,64 @@
 .input:focus {
   outline: none;
   border-color: var(--color-accent);
+}
+
+.plusButton {
+  flex-shrink: 0;
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.4rem;
+  height: 2.4rem;
+  padding: 0;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-ink-muted);
+  transition:
+    color var(--transition),
+    border-color var(--transition),
+    background var(--transition),
+    transform var(--transition);
+}
+
+.plusButton:hover:not(:disabled) {
+  color: var(--color-ink);
+  border-color: var(--color-ink-muted);
+  background: rgba(44, 38, 34, 0.03);
+}
+
+.plusButton:active:not(:disabled) {
+  transform: scale(0.96);
+}
+
+.plusButton:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.plusPulse {
+  animation: plus-pulse 420ms ease;
+  border-color: var(--color-accept);
+  color: var(--color-accept);
+}
+
+.plusIcon {
+  width: 1rem;
+  height: 1rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+}
+
+.message {
+  margin: 0 0 var(--space-md);
+  font-size: 0.85rem;
+  line-height: 1.4;
+  color: var(--color-ink-muted);
+  animation: fade-swap 200ms ease both;
 }
 
 .actions {
@@ -150,5 +216,17 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes plus-pulse {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.08);
+  }
+  100% {
+    transform: scale(1);
   }
 }

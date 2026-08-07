@@ -1,12 +1,14 @@
+import type { PoolAddResult } from '../types'
 import { formatHeaderDate } from '../utils/dates'
 import { WriteOwnUlam } from './WriteOwnUlam'
 import styles from './Header.module.css'
 
 interface HeaderProps {
   onAddCustomUlam: (rawName: string) => boolean
+  onAddToPool: (rawName: string) => PoolAddResult
 }
 
-export function Header({ onAddCustomUlam }: HeaderProps) {
+export function Header({ onAddCustomUlam, onAddToPool }: HeaderProps) {
   const { weekday, fullDate } = formatHeaderDate()
 
   return (
@@ -16,7 +18,10 @@ export function Header({ onAddCustomUlam }: HeaderProps) {
         <p className={styles.weekday}>{weekday}</p>
         <p className={styles.fullDate}>{fullDate}</p>
       </div>
-      <WriteOwnUlam onAdd={onAddCustomUlam} />
+      <WriteOwnUlam
+        onAddToToday={onAddCustomUlam}
+        onAddToPool={onAddToPool}
+      />
     </header>
   )
 }

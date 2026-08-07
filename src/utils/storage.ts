@@ -11,6 +11,7 @@ const STORAGE_KEY = 'ulam-diaries-state'
 const EMPTY_STATE: UlamDiaryState = {
   history: [],
   excludedDishes: [],
+  customPool: [],
 }
 
 function isDayDish(value: unknown): value is DayDish {
@@ -24,24 +25,24 @@ function isDayDish(value: unknown): value is DayDish {
   )
 }
 
-function toDayDish(name: string): DayDish {
-  // Legacy string entries: restore-to-pool if they match the predefined list.
-  const isPredefined = ULAM_LIST.some(
+function toDayDish(name: string, customPool: string[]): DayDish {
+  const pool = [...ULAM_LIST, ...customPool]
+  const isInPool = pool.some(
     (dish) => dish.toLowerCase() === name.toLowerCase(),
   )
   return {
     name,
-    source: isPredefined ? 'generated' : 'custom',
+    source: isInPool ? 'generated' : 'custom',
   }
 }
 
-function normalizeDishes(dishes: unknown[]): DayDish[] {
+function normalizeDishes(dishes: unknown[], customPool: string[]): DayDish[] {
   const result: DayDish[] = []
 
   for (const item of dishes) {
     if (typeof item === 'string') {
       if (!result.some((d) => d.name.toLowerCase() === item.toLowerCase())) {
-        result.push(toDayDish(item))
+        result.push(toDayDish(item, customPool))
       }
       continue
     }
@@ -68,23 +69,41 @@ function isLegacyEntry(value: unknown): value is LegacySavedUlam {
   return typeof entry.date === 'string' && typeof entry.name === 'string'
 }
 
+function normalizeCustomPool(value: unknown): string[] {
+  if (!Array.isArray(value)) return []
+  const result: string[] = []
+  for (const item of value) {
+    if (typeof item !== 'string') continue
+    const name = item.trim().replace(/\s+/g, ' ')
+    if (!name) continue
+    if (result.some((dish) => dish.toLowerCase() === name.toLowerCase())) continue
+    // Skip anything already in the built-in list.
+    if (ULAM_LIST.some((dish) => dish.toLowerCase() === name.toLowerCase())) {
+      continue
+    }
+    result.push(name)
+  }
+  return result
+}
+
 /**
  * Migrates older history shapes into DailyUlamEntry[] with DayDish sources.
  */
-function migrateHistory(rawHistory: unknown[]): DailyUlamEntry[] {
+function migrateHistory(
+  rawHistory: unknown[],
+  customPool: string[],
+): DailyUlamEntry[] {
   if (rawHistory.length === 0) return []
 
-  // Multi-day entries (string[] or DayDish[]).
   if (rawHistory.every(isDailyEntry)) {
     return (rawHistory as { date: string; dishes: unknown[] }[]).map(
       (entry) => ({
         date: entry.date,
-        dishes: normalizeDishes(entry.dishes),
+        dishes: normalizeDishes(entry.dishes, customPool),
       }),
     )
   }
 
-  // Legacy SavedUlam rows → group by date.
   if (rawHistory.every(isLegacyEntry)) {
     const byDate = new Map<string, DayDish[]>()
     const chronological = [...(rawHistory as LegacySavedUlam[])].reverse()
@@ -92,7 +111,7 @@ function migrateHistory(rawHistory: unknown[]): DailyUlamEntry[] {
     for (const item of chronological) {
       const existing = byDate.get(item.date) ?? []
       if (!existing.some((d) => d.name.toLowerCase() === item.name.toLowerCase())) {
-        existing.push(toDayDish(item.name))
+        existing.push(toDayDish(item.name, customPool))
       }
       byDate.set(item.date, existing)
     }
@@ -112,11 +131,12 @@ function migrateHistory(rawHistory: unknown[]): DailyUlamEntry[] {
 export function loadState(): UlamDiaryState {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
-    if (!raw) return { history: [], excludedDishes: [] }
+    if (!raw) return { history: [], excludedDishes: [], customPool: [] }
 
     const parsed = JSON.parse(raw) as Partial<UlamDiaryState>
+    const customPool = normalizeCustomPool(parsed.customPool)
     const history = Array.isArray(parsed.history)
-      ? migrateHistory(parsed.history)
+      ? migrateHistory(parsed.history, customPool)
       : []
 
     return {
@@ -124,9 +144,10 @@ export function loadState(): UlamDiaryState {
       excludedDishes: Array.isArray(parsed.excludedDishes)
         ? parsed.excludedDishes
         : [],
+      customPool,
     }
   } catch {
-    return { ...EMPTY_STATE, history: [], excludedDishes: [] }
+    return { ...EMPTY_STATE, history: [], excludedDishes: [], customPool: [] }
   }
 }
 

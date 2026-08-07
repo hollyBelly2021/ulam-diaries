@@ -6,8 +6,8 @@ export interface DayDish {
   name: string
   /**
    * - generated: accepted from the random generator
-   * - matched: typed manually, matched a predefined dish
-   * - custom: typed manually, not in the predefined pool
+   * - matched: typed manually, matched a dish already in the pool
+   * - custom: typed manually, not in the dish pool
    */
   source: DishSource
 }
@@ -24,8 +24,10 @@ export interface DailyUlamEntry {
 export interface UlamDiaryState {
   /** Completed / saved days (newest first). */
   history: DailyUlamEntry[]
-  /** Predefined dish names that should not appear in random suggestions. */
+  /** Dish names that should not appear in random suggestions. */
   excludedDishes: string[]
+  /** User-added dishes permanently available for random generation. */
+  customPool: string[]
 }
 
 /** Legacy single-dish history shape (pre multi-ulam update). */
@@ -34,3 +36,9 @@ export interface LegacySavedUlam {
   name: string
   date: string
 }
+
+/** Result of trying to add a dish to the permanent generation pool. */
+export type PoolAddResult =
+  | { status: 'added'; name: string }
+  | { status: 'exists'; name: string }
+  | { status: 'empty' }

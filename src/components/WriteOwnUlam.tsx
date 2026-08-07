@@ -1,16 +1,20 @@
 import { useEffect, useId, useRef, useState, type FormEvent } from 'react'
+import type { PoolAddResult } from '../types'
 import styles from './WriteOwnUlam.module.css'
 
 interface WriteOwnUlamProps {
-  onAdd: (rawName: string) => boolean
+  onAddToToday: (rawName: string) => boolean
+  onAddToPool: (rawName: string) => PoolAddResult
 }
 
 /**
  * Subtle write icon under the date. Opens a small form to type a custom ulam.
  */
-export function WriteOwnUlam({ onAdd }: WriteOwnUlamProps) {
+export function WriteOwnUlam({ onAddToToday, onAddToPool }: WriteOwnUlamProps) {
   const [open, setOpen] = useState(false)
   const [value, setValue] = useState('')
+  const [message, setMessage] = useState<string | null>(null)
+  const [plusPulse, setPlusPulse] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
   const titleId = useId()
   const inputId = useId()
@@ -24,6 +28,8 @@ export function WriteOwnUlam({ onAdd }: WriteOwnUlamProps) {
   function close() {
     setOpen(false)
     setValue('')
+    setMessage(null)
+    setPlusPulse(false)
   }
 
   function handleSubmit(event: FormEvent) {
@@ -31,8 +37,24 @@ export function WriteOwnUlam({ onAdd }: WriteOwnUlamProps) {
     const trimmed = value.trim()
     if (!trimmed) return
 
-    const added = onAdd(trimmed)
+    const added = onAddToToday(trimmed)
     if (added) close()
+  }
+
+  function handleAddToPool() {
+    const trimmed = value.trim()
+    if (!trimmed) return
+
+    const result = onAddToPool(trimmed)
+    if (result.status === 'empty') return
+
+    if (result.status === 'added') {
+      setMessage(`✓ Added "${result.name}" to your ulam list.`)
+      setPlusPulse(true)
+      window.setTimeout(() => setPlusPulse(false), 420)
+    } else {
+      setMessage(`"${result.name}" is already in your ulam list.`)
+    }
   }
 
   return (
@@ -62,23 +84,50 @@ export function WriteOwnUlam({ onAdd }: WriteOwnUlamProps) {
           <label id={titleId} className={styles.label} htmlFor={inputId}>
             Write your own ulam
           </label>
-          <input
-            id={inputId}
-            ref={inputRef}
-            className={styles.input}
-            type="text"
-            value={value}
-            onChange={(event) => setValue(event.target.value)}
-            placeholder="e.g. Chicken Adobo"
-            autoComplete="off"
-            maxLength={80}
-          />
-          <div className={styles.actions}>
+
+          <div className={styles.inputRow}>
+            <input
+              id={inputId}
+              ref={inputRef}
+              className={styles.input}
+              type="text"
+              value={value}
+              onChange={(event) => {
+                setValue(event.target.value)
+                if (message) setMessage(null)
+              }}
+              placeholder="e.g. Chicken Adobo"
+              autoComplete="off"
+              maxLength={80}
+            />
             <button
               type="button"
-              className={styles.cancel}
-              onClick={close}
+              className={`${styles.plusButton}${
+                plusPulse ? ` ${styles.plusPulse}` : ''
+              }`}
+              onClick={handleAddToPool}
+              disabled={!value.trim()}
+              aria-label="Add dish to ulam list"
+              title="Add to ulam list"
             >
+              <svg
+                className={styles.plusIcon}
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
+                <path d="M12 5v14M5 12h14" />
+              </svg>
+            </button>
+          </div>
+
+          {message && (
+            <p className={styles.message} role="status" aria-live="polite">
+              {message}
+            </p>
+          )}
+
+          <div className={styles.actions}>
+            <button type="button" className={styles.cancel} onClick={close}>
               Cancel
             </button>
             <button
@@ -86,7 +135,7 @@ export function WriteOwnUlam({ onAdd }: WriteOwnUlamProps) {
               className={styles.add}
               disabled={!value.trim()}
             >
-              Add
+              Add to Today
             </button>
           </div>
         </form>
