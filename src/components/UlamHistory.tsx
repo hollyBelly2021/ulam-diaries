@@ -1,17 +1,18 @@
 import { useState } from 'react'
-import type { DailyUlamEntry } from '../types'
+import type { DailyUlamEntry, DayDish } from '../types'
 import { formatHistoryDate } from '../utils/dates'
+import { restoresToPool } from '../utils/dishes'
 import styles from './UlamHistory.module.css'
 
 interface PendingDelete {
   date: string
-  dish: string
+  dish: DayDish
 }
 
 interface UlamHistoryProps {
   /** Previous days only (excludes today's entry). */
   entries: DailyUlamEntry[]
-  onDeleteDish: (date: string, dish: string) => void
+  onDeleteDish: (date: string, dishName: string) => void
 }
 
 export function UlamHistory({ entries, onDeleteDish }: UlamHistoryProps) {
@@ -32,12 +33,15 @@ export function UlamHistory({ entries, onDeleteDish }: UlamHistoryProps) {
               <p className={styles.date}>{formatHistoryDate(entry.date)}</p>
               <ul className={styles.dishList}>
                 {entry.dishes.map((dish) => (
-                  <li key={`${entry.date}-${dish}`} className={styles.dishRow}>
-                    <span className={styles.name}>{dish}</span>
+                  <li
+                    key={`${entry.date}-${dish.name}`}
+                    className={styles.dishRow}
+                  >
+                    <span className={styles.name}>{dish.name}</span>
                     <button
                       type="button"
                       className={styles.deleteBtn}
-                      aria-label={`Remove ${dish} from diary`}
+                      aria-label={`Remove ${dish.name} from diary`}
                       onClick={() =>
                         setPendingDelete({ date: entry.date, dish })
                       }
@@ -66,8 +70,9 @@ export function UlamHistory({ entries, onDeleteDish }: UlamHistoryProps) {
           aria-modal="true"
         >
           <p id="delete-ulam-title" className={styles.message}>
-            Remove {pendingDelete.dish} from your diary? It will be available
-            again in future suggestions.
+            {restoresToPool(pendingDelete.dish)
+              ? `Remove ${pendingDelete.dish.name} from your diary? It will be available again in future suggestions.`
+              : `Remove ${pendingDelete.dish.name} from your diary?`}
           </p>
           <div className={styles.actions}>
             <button
@@ -81,7 +86,7 @@ export function UlamHistory({ entries, onDeleteDish }: UlamHistoryProps) {
               type="button"
               className={styles.confirm}
               onClick={() => {
-                onDeleteDish(pendingDelete.date, pendingDelete.dish)
+                onDeleteDish(pendingDelete.date, pendingDelete.dish.name)
                 setPendingDelete(null)
               }}
             >

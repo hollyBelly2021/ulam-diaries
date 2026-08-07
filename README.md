@@ -1,4 +1,4 @@
-# Ulam Diaries
+# Ulam Diary
 
 A simple, mobile-friendly web app that helps you randomly choose a Filipino dish (*ulam*) for the day. Once you accept a dish, it becomes today’s saved ulam and won’t appear in future suggestions.
 

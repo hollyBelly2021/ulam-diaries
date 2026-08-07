@@ -4,12 +4,31 @@ interface UlamResultProps {
   dishName: string
   onReject: () => void
   onAccept: () => void
+  /** When set, shows a top-right exit control (does not reject/accept). */
+  onClose?: () => void
 }
 
 /** Shows a generated suggestion with reject / accept actions. */
-export function UlamResult({ dishName, onReject, onAccept }: UlamResultProps) {
+export function UlamResult({
+  dishName,
+  onReject,
+  onAccept,
+  onClose,
+}: UlamResultProps) {
   return (
     <div className={styles.result} key={dishName}>
+      {onClose && (
+        <button
+          type="button"
+          className={styles.closeButton}
+          onClick={onClose}
+          aria-label="Close generator"
+        >
+          <svg className={styles.closeIcon} viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M6 6l12 12M18 6L6 18" />
+          </svg>
+        </button>
+      )}
       <h2 className={styles.dishName}>{dishName}</h2>
       <div className={styles.actions}>
         <button

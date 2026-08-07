@@ -28,25 +28,33 @@
   margin: 0;
   padding: 0;
   border-top: 1px solid var(--color-line-soft);
+  overflow: hidden;
 }
 
 .currentItem {
   position: relative;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: var(--space-sm);
   margin: 0;
   padding: 0.7rem 0;
   border-bottom: 1px solid var(--color-line-soft);
-  animation: fade-swap 280ms ease both;
+  /* Opacity-only enter so swipe translateX is not fighting the animation. */
+  animation: fade-in 280ms ease both;
   text-align: left;
-  overflow: hidden;
+  touch-action: pan-y;
+  cursor: grab;
+  user-select: none;
+  will-change: transform;
+  background: transparent;
+}
+
+.currentItem:active {
+  cursor: grabbing;
 }
 
 .currentItemLeaving {
-  animation: fade-out 220ms ease forwards;
   pointer-events: none;
+  animation: none;
 }
 
 .currentName {
@@ -55,69 +63,6 @@
   font-weight: 600;
   line-height: 1.2;
   color: var(--color-ink);
-}
-
-/* Hidden by default on desktop; fades in on hover / focus. */
-.removeBtn {
-  flex-shrink: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 1.6rem;
-  height: 1.6rem;
-  margin: 0 -0.2rem 0 0;
-  padding: 0;
-  border: none;
-  border-radius: var(--radius-sm);
-  background: transparent;
-  color: #9a9188;
-  opacity: 0;
-  pointer-events: none;
-  transition:
-    opacity 0.2s ease,
-    color 0.2s ease,
-    transform 0.2s ease;
-}
-
-.currentItem:hover .removeBtn,
-.currentItem:focus-within .removeBtn {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-.removeBtn:hover:not(:disabled) {
-  color: var(--color-ink);
-  transform: scale(1.1);
-}
-
-.removeBtn:active:not(:disabled) {
-  transform: scale(0.96);
-}
-
-.removeBtn:disabled {
-  cursor: default;
-}
-
-.removeIcon {
-  width: 0.85rem;
-  height: 0.85rem;
-  stroke: currentColor;
-  stroke-width: 1.75;
-  fill: none;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-/* Touch / narrow screens: always show the remove control. */
-@media (hover: none), (max-width: 640px) {
-  .removeBtn {
-    opacity: 1;
-    pointer-events: auto;
-  }
-
-  .currentItemLeaving .removeBtn {
-    opacity: 0;
-  }
 }
 
 .primaryButton {
@@ -197,17 +142,11 @@
   }
 }
 
-@keyframes fade-out {
+@keyframes fade-in {
   from {
-    opacity: 1;
-    transform: translateY(0);
-    max-height: 4rem;
+    opacity: 0;
   }
   to {
-    opacity: 0;
-    transform: translateY(-4px);
-    max-height: 0;
-    padding-top: 0;
-    padding-bottom: 0;
+    opacity: 1;
   }
 }

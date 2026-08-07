@@ -1,6 +1,48 @@
 .result {
+  position: relative;
+  width: 100%;
   text-align: center;
   animation: fade-swap 280ms ease both;
+  padding-top: 0.35rem;
+}
+
+.closeButton {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: #a59c93;
+  transition:
+    color var(--transition),
+    background var(--transition),
+    transform var(--transition);
+}
+
+.closeButton:hover {
+  color: var(--color-ink-muted);
+  background: rgba(44, 38, 34, 0.04);
+}
+
+.closeButton:active {
+  transform: scale(0.96);
+}
+
+.closeIcon {
+  width: 0.9rem;
+  height: 0.9rem;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .dishName {
@@ -10,6 +52,7 @@
   font-weight: 600;
   line-height: 1.15;
   color: var(--color-ink);
+  padding: 0 1.75rem;
 }
 
 .actions {
