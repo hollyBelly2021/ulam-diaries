@@ -125,7 +125,7 @@ function migrateHistory(
 }
 
 /**
- * Loads the diary from localStorage.
+ * Loads the diary from localStorage (source of truth for Current Ulam).
  * Migrates legacy history shapes when needed.
  */
 export function loadState(): UlamDiaryState {
@@ -151,7 +151,10 @@ export function loadState(): UlamDiaryState {
   }
 }
 
-/** Saves the full diary state to localStorage. */
+/**
+ * Saves the full diary state to localStorage immediately.
+ * Today's Current Ulam lives in history under today's date key.
+ */
 export function saveState(state: UlamDiaryState): void {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state))
 }

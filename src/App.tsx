@@ -17,7 +17,6 @@ import {
   getFullDishPool,
   isExcluded,
   normalizeDishInput,
-  restoresToPool,
   sameDishName,
 } from './utils/dishes'
 import { pickRandomDish } from './utils/random'
@@ -75,18 +74,52 @@ function stillSavedElsewhere(
   return history.some((entry) => dayHasDish(entry.dishes, dishName))
 }
 
+/**
+ * Pool dishes (built-in or custom) should return to random generation
+ * when removed from a day's list and not saved on another day.
+ */
+function shouldReturnToPool(
+  dishName: string,
+  customPool: string[],
+  history: DailyUlamEntry[],
+): boolean {
+  const inPool = Boolean(
+    findInDishPool(dishName, getFullDishPool(customPool)),
+  )
+  return inPool && !stillSavedElsewhere(history, dishName)
+}
+
 export default function App() {
-  // Load saved diary from localStorage on first render.
+  // localStorage is the source of truth for Current Ulam / history / pool.
   const [state, setState] = useState<UlamDiaryState>(() => loadState())
   const [suggestion, setSuggestion] = useState<string | null>(null)
   const [previousSuggestion, setPreviousSuggestion] = useState<string | null>(
     null,
   )
 
-  // Persist whenever diary state changes.
+  // Keep a backup sync in case any update path misses an immediate write.
   useEffect(() => {
     saveState(state)
   }, [state])
+
+  /**
+   * Update React state and write localStorage in the same turn
+   * so Current Ulam never drifts after refresh.
+   */
+  function commitState(
+    updater: (prev: UlamDiaryState) => UlamDiaryState,
+  ): UlamDiaryState {
+    let nextState = state
+    setState((prev) => {
+      const next = updater(prev)
+      nextState = next
+      if (next !== prev) {
+        saveState(next)
+      }
+      return next
+    })
+    return nextState
+  }
 
   const todayKey = getTodayKey()
 
@@ -104,13 +137,11 @@ export default function App() {
     [todaysDishes],
   )
 
-  // Built-in + user-added dishes (used for autocomplete and generation).
   const dishPool = useMemo(
     () => getFullDishPool(state.customPool),
     [state.customPool],
   )
 
-  // Available pool = full pool, minus excluded and today's picks.
   const availableDishes = useMemo(() => {
     const todayLower = new Set(
       todaysDishes.map((dish) => dish.name.toLowerCase()),
@@ -153,11 +184,12 @@ export default function App() {
     generateSuggestion(suggestion)
   }
 
+  // Accept → append to today's Current Ulam and persist immediately.
   function handleAccept() {
     if (!suggestion) return
     const dishName = suggestion
 
-    setState((prev) => {
+    commitState((prev) => {
       const existing = prev.history.find((entry) => entry.date === todayKey)
       if (existing && dayHasDish(existing.dishes, dishName)) return prev
 
@@ -175,8 +207,8 @@ export default function App() {
   }
 
   /**
-   * Adds a typed ulam to today's list.
-   * If it matches the pool (built-in or custom), exclude it from generation.
+   * Adds a typed ulam to today's list and persists immediately.
+   * If it matches the pool, exclude it from generation.
    */
   function handleAddCustomUlam(rawName: string): boolean {
     const trimmed = normalizeDishInput(rawName)
@@ -185,7 +217,7 @@ export default function App() {
     let added = false
     let displayName = trimmed
 
-    setState((prev) => {
+    commitState((prev) => {
       const poolMatch = findInDishPool(
         trimmed,
         getFullDishPool(prev.customPool),
@@ -222,17 +254,13 @@ export default function App() {
     return added
   }
 
-  /**
-   * Permanently adds a dish to the random-generation pool.
-   * Does not add it to today's ulam.
-   */
   function handleAddToPool(rawName: string): PoolAddResult {
     const trimmed = normalizeDishInput(rawName)
     if (!trimmed) return { status: 'empty' }
 
     let result: PoolAddResult = { status: 'empty' }
 
-    setState((prev) => {
+    commitState((prev) => {
       const pool = getFullDishPool(prev.customPool)
       const existing = findInDishPool(trimmed, pool)
 
@@ -252,7 +280,7 @@ export default function App() {
   }
 
   function handleResetList() {
-    setState((prev) => ({
+    commitState((prev) => ({
       ...prev,
       excludedDishes: [],
     }))
@@ -263,18 +291,15 @@ export default function App() {
   function handleDeleteDish(date: string, dishName: string) {
     if (date === todayKey) return
 
-    setState((prev) => {
+    commitState((prev) => {
       const { history, removed } = removeDishFromHistory(
         prev.history,
         date,
         dishName,
       )
+      if (!removed) return { ...prev, history }
 
-      if (!removed || !restoresToPool(removed)) {
-        return { ...prev, history }
-      }
-
-      if (stillSavedElsewhere(history, removed.name)) {
+      if (!shouldReturnToPool(removed.name, prev.customPool, history)) {
         return { ...prev, history }
       }
 
@@ -288,19 +313,20 @@ export default function App() {
     })
   }
 
+  /**
+   * Swipe-remove from Current Ulam of the Day:
+   * update UI + localStorage immediately so a refresh cannot restore it.
+   */
   function handleRemoveTodayDish(dishName: string) {
-    setState((prev) => {
+    commitState((prev) => {
       const { history, removed } = removeDishFromHistory(
         prev.history,
         todayKey,
         dishName,
       )
+      if (!removed) return { ...prev, history }
 
-      if (!removed || !restoresToPool(removed)) {
-        return { ...prev, history }
-      }
-
-      if (stillSavedElsewhere(history, removed.name)) {
+      if (!shouldReturnToPool(removed.name, prev.customPool, history)) {
         return { ...prev, history }
       }
 
