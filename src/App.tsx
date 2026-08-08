@@ -104,19 +104,24 @@ export default function App() {
     [todaysDishes],
   )
 
-  // Available pool = built-in + custom, minus excluded and today's picks.
+  // Built-in + user-added dishes (used for autocomplete and generation).
+  const dishPool = useMemo(
+    () => getFullDishPool(state.customPool),
+    [state.customPool],
+  )
+
+  // Available pool = full pool, minus excluded and today's picks.
   const availableDishes = useMemo(() => {
     const todayLower = new Set(
       todaysDishes.map((dish) => dish.name.toLowerCase()),
     )
-    const pool = getFullDishPool(state.customPool)
 
-    return pool.filter(
+    return dishPool.filter(
       (dish) =>
         !isExcluded(state.excludedDishes, dish) &&
         !todayLower.has(dish.toLowerCase()),
     )
-  }, [state.excludedDishes, state.customPool, todaysDishes])
+  }, [state.excludedDishes, dishPool, todaysDishes])
 
   const previousEntries = useMemo(
     () => state.history.filter((entry) => entry.date !== todayKey),
@@ -316,6 +321,8 @@ export default function App() {
   return (
     <div className="app">
       <Header
+        dishPool={dishPool}
+        todaysDishes={todaysDishNames}
         onAddCustomUlam={handleAddCustomUlam}
         onAddToPool={handleAddToPool}
       />
